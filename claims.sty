@@ -1,0 +1,91 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{claims}[2016/09/16]
+
+\RequirePackage{color}
+
+\newif\if@trackinputfiles
+
+\DeclareOption{paperdeadline}{%
+\def\claim[#1]#2{#2}
+\def\majorclaim[#1]#2{#2}
+\def\claimref{\claimref@id}
+}
+
+\DeclareOption{checked}{%
+\def\claimref{\claimref@write}
+\def\claim[#1]#2{\claim@internal[minor][#1]{#2}}
+\def\majorclaim[#1]#2{\claim@internal[major][#1]{#2}}
+}
+
+\DeclareOption{trackinput}{\@trackinputfilestrue}
+\DeclareOption{notrackinput}{\@trackinputfilesfalse}
+
+\ExecuteOptions{checked,trackinput}
+
+\ProcessOptions\relax
+
+\def\invalid@claim{1}
+\def\valid@claim{2}
+
+\if@trackinputfiles \newcount\claim@inputstack
+\claim@inputstack=0
+\let\old@input\input
+\def\inputfile@stack@0{\jobname}
+\def\input#1{\advance\claim@inputstack by1 \expandafter\def\csname inputfile@stack@\number\claim@inputstack\endcsname{#1}\old@input{#1}\advance\claim@inputstack by-1}
+\def\the@input#1{\csname inputfile@stack@\number\claim@inputstack\endcsname.tex:#1}
+\else
+\def\the@input#1{l.#1}
+\fi
+
+\IfFileExists{\jobname.vld}{\input{\jobname.vld}}{}
+
+\newwrite\claimoutput
+\immediate\openout\claimoutput=\jobname.clm\relax
+
+\newif\if@activeclaim
+\newcount\claimrefs@counter
+\claimrefs@counter=0
+
+\def\claimref@write[#1]#2{%
+\advance\claimrefs@counter by1%
+\global\expandafter\def\csname claimref@key@\number\claimrefs@counter\endcsname{#1}%
+\global\expandafter\def\csname claimref@value@\number\claimrefs@counter\endcsname{#2}%
+#2}
+
+\def\claimref@id[#1]#2{#2}
+
+\def\write@claimrefs@rec{%
+\ifnum\number\claimrefs@counter>0 \immediate\write\claimoutput{\csname claimref@key@\number\claimrefs@counter\endcsname}%
+\immediate\write\claimoutput{\csname claimref@value@\number\claimrefs@counter\endcsname}%
+\advance\claimrefs@counter by-1 %
+\write@claimrefs@rec{}%
+\fi%
+}
+
+\def\write@claimrefs{\immediate\write\claimoutput{\number\claimrefs@counter}%
+\write@claimrefs@rec{}}
+
+\def\falseclaim[#1]#2{\textcolor{red}{[Claim ``#1'']:} #2 \textcolor{red}{[is FALSE]}}
+\def\unknownclaim[#1]#2{\textcolor{blue}{[Claim ``#1'']:} #2 \textcolor{blue}{[is unverified]}}
+\def\validclaim[#1]#2{#2}
+
+\def\claim@internal[#1][#2]#3{%
+\if@activeclaim\PackageError{claims}{Nested claim invocation}\fi%
+\ifnum \number\claimrefs@counter>0 \PackageError{claims}{Internal variant broken}\fi%
+\ifcsname claimed@#2\endcsname\PackageError{claims}{Duplicate claim #2, previous definition: \csname claimed@#2\endcsname}\fi
+\expandafter\edef\csname claimed@#2\endcsname{\the@input{\the\inputlineno}}
+\@activeclaimtrue%
+\ifcsname vld@#2\endcsname\relax%
+\edef\name@tmp{\csname vld@#2\endcsname}%
+\ifx\name@tmp\invalid@claim\relax%
+\falseclaim[#2]{#3}%
+\else \ifx\name@tmp\valid@claim\relax%
+\validclaim[#2]{#3}\fi\fi%
+\else\unknownclaim[#2]{#3}\fi%
+\protected@write\claimoutput{}{@CLAIM@#2}%
+\protected@write\claimoutput{\let\claimref\claimref@id}{#3}%
+\immediate\write\claimoutput{#1 #2}%
+\write@claimrefs{}%
+\@activeclaimfalse}
+
+\endinput

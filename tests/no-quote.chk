@@ -1,0 +1,4 @@
+witharg:
+  cmd: "python ./no-quotev.py 3%(arg)s4"
+  no_quote: True
+  shell: True
