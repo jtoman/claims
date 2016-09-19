@@ -118,7 +118,7 @@ eels: "python ./find-eels.py"
 Where `find-eels.py` exits with code 0 when the hovercraft is full of eels,
 and some non-zero code when no eels are found. Notice the relative
 reference in the command-line: verifiers are run in the directory containing the
-check file.
+yaml file.
 
 ### Using Claim References
 
@@ -163,7 +163,7 @@ the following format:
 
 * `cmd`: The command-line string/shell command for the verifier (**Required**)
 * `shell`: If true, interpret `cmd` as a shell command (**Optional**; default: false)
-* `invert`: If true, an exit code of 0 indicates a false claim, non-zero a true claim (**Optional**; default: true)
+* `invert`: If true, an exit code of 0 indicates a false claim, non-zero a true claim (**Optional**; default: false)
 * `no_quote`: If True, do not quote any claim references. If a list, do not quote the references named in the list. (**Optional**; default: false)
 
 ## Verifying the Claims
