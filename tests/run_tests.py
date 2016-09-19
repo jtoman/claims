@@ -60,12 +60,14 @@ shutil.copy(ROOT_DIR + "/claims.sty", THIS_DIR)
 
 def cleanup():
     subprocess.call("rm *.pdf *.aux *.vld *.clm *.log", cwd = THIS_DIR, shell=True)
+    subprocess.call(["rm", "claims.sty"], cwd = THIS_DIR)
 
 try:
     expect_fail("fail.tex")
     expect_pass("invert.tex")
     expect_pass("no-quote.tex")
     expect_unverified("unverified.tex")
+    expect_pass("dash.tex")
 except TestFailedError as e:
     print "Test FAILED"
     print e.message

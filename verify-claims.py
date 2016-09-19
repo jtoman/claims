@@ -119,9 +119,9 @@ def write_results(valid_file, results):
             if v is None:
                 continue
             elif v is True:
-                print >> f, '\def\\vld@%s{2}' % k
+                print >> f, '\expandafter\def\csname vld@%s\endcsname{2}' % k
             else:
-                print >> f, '\def\\vld@%s{1}' % k
+                print >> f, '\expandafter\def\csname vld@%s\endcsname{1}' % k
 
 if len(sys.argv) == 1:
     print "Usage: " + sys.argv[0] + " claim-file [verify-file]"
