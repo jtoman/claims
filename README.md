@@ -45,7 +45,7 @@ is contained in the file `paper.tex`. `claims` is used as follows:
 
 1. Find and tag all claims in the paper, optionally marking any values in the claim needed for verification
 2. Specify verifiers for all claims made in your paper
-3. Run the latex compiler on the paper source. This produces the ancilliary file `paper.clm`
+3. Run the latex compiler on the paper source. This produces the ancillary file `paper.clm`
 4. Run the `verify-claims.py` script on the generated `paper.clm`. This will generated `paper.vld` which records which claims have been validated.
 5. Recompile the paper. Any remaining false or unverified claims remaining should be investigated (optional).
 
@@ -82,7 +82,7 @@ Claims often reference a specific value of number. For example:
 \claim[eels-ref]{My hovercraft has fewer than 1000 eels}
 ```
 
-To check this claim, the number of eels in the hovercraft must be comapred to the number
+To check this claim, the number of eels in the hovercraft must be compared to the number
 1000 referenced in the text. This value could be hard-coded in the verifier (see below)
 but this would make the verification process brittle.
 
@@ -103,7 +103,7 @@ Verifiers for claims are specified in a yaml file and are
 checked with the `verify-claims.py` script (see below).
 
 The yaml file should be a dictionary: keys are claim ids, and
-the entries specify that claim's verififer. 
+the entries specify that claim's verifier. 
 Each verifier in turn specifies how to execute a program to check
 the claim: if the program exits with return code 0 then the claim
 is considered true, any other exit code indicates the claim is false.
