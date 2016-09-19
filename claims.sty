@@ -47,20 +47,20 @@
 \claimrefs@counter=0
 
 \def\claimref@write[#1]#2{%
-\advance\claimrefs@counter by1%
-\global\expandafter\def\csname claimref@key@\number\claimrefs@counter\endcsname{#1}%
-\global\expandafter\def\csname claimref@value@\number\claimrefs@counter\endcsname{#2}%
-#2}
+  \advance\claimrefs@counter by1%
+  \global\expandafter\def\csname claimref@key@\number\claimrefs@counter\endcsname{#1}%
+  \global\expandafter\def\csname claimref@value@\number\claimrefs@counter\endcsname{#2}%
+  #2}
 
 \def\claimref@id[#1]#2{#2}
 
 \def\write@claimrefs@rec{%
-\ifnum\number\claimrefs@counter>0 \immediate\write\claimoutput{\csname claimref@key@\number\claimrefs@counter\endcsname}%
-\immediate\write\claimoutput{\csname claimref@value@\number\claimrefs@counter\endcsname}%
-\advance\claimrefs@counter by-1 %
-\write@claimrefs@rec{}%
-\fi%
-}
+\ifnum \number\claimrefs@counter>0%
+  \immediate\write\claimoutput{\csname claimref@key@\number\claimrefs@counter\endcsname}%
+  \immediate\write\claimoutput{\csname claimref@value@\number\claimrefs@counter\endcsname}%
+  \advance\claimrefs@counter by-1 %
+  \write@claimrefs@rec{}%
+\fi}
 
 \def\write@claimrefs{\immediate\write\claimoutput{\number\claimrefs@counter}%
 \write@claimrefs@rec{}}
@@ -70,22 +70,38 @@
 \def\validclaim[#1]#2{#2}
 
 \def\claim@internal[#1][#2]#3{%
+%% invariant checking
 \if@activeclaim\PackageError{claims}{Nested claim invocation}\fi%
 \ifnum \number\claimrefs@counter>0 \PackageError{claims}{Internal variant broken}\fi%
-\ifcsname claimed@#2\endcsname\PackageError{claims}{Duplicate claim #2, previous definition: \csname claimed@#2\endcsname}\fi
-\expandafter\edef\csname claimed@#2\endcsname{\the@input{\the\inputlineno}}
+%% check for duplicated claims
+\ifcsname claimed@#2\endcsname\relax%
+   \PackageError{claims}{Duplicate claim #2, previous definition: \csname claimed@#2\endcsname}%
+\fi%
+\expandafter\edef\csname claimed@#2\endcsname{\the@input{\the\inputlineno}}%
+%%
+%% Start claim processing
 \@activeclaimtrue%
+%% Write the claim to document, tagging if necessasry
 \ifcsname vld@#2\endcsname\relax%
-\edef\name@tmp{\csname vld@#2\endcsname}%
-\ifx\name@tmp\invalid@claim\relax%
-\falseclaim[#2]{#3}%
-\else \ifx\name@tmp\valid@claim\relax%
-\validclaim[#2]{#3}\fi\fi%
-\else\unknownclaim[#2]{#3}\fi%
+  \edef\name@tmp{\csname vld@#2\endcsname}%
+  \ifx\name@tmp\invalid@claim\relax%
+     \falseclaim[#2]{#3}%
+  \else %
+     \ifx\name@tmp\valid@claim\relax%
+       \validclaim[#2]{#3}%
+     \fi%
+   \fi%
+\else %
+  \unknownclaim[#2]{#3}%
+\fi%
+%% write metadata
 \protected@write\claimoutput{}{@CLAIM@#2}%
 \protected@write\claimoutput{\let\claimref\claimref@id}{#3}%
 \immediate\write\claimoutput{#1 #2}%
 \write@claimrefs{}%
-\@activeclaimfalse}
+%%
+%% End claim processing
+\@activeclaimfalse%
+}
 
 \endinput
