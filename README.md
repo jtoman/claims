@@ -202,3 +202,10 @@ all claims.
 
 Further, currently you must remember to re-run the verification script after adding or changing
 a claim. Future versions will (hopefully!) address this pain point.
+
+## License and Copyright
+
+Copyright John Toman 2016.
+
+Released under the LaTeX Project Public License 1.3 or later.
+
