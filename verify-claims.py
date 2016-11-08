@@ -1,7 +1,7 @@
 import sys, subprocess, os, yaml
 
 def detex_claim(claim_text):
-    proc = subprocess.Popen(["detex", "-"], stdin = subprocess.PIPE, stdout = subprocess.PIPE)
+    proc = subprocess.Popen(["detex", "-s", "-"], stdin = subprocess.PIPE, stdout = subprocess.PIPE)
     (out, err) = proc.communicate(claim_text)
     assert proc.returncode == 0
     return out
@@ -29,7 +29,7 @@ def parse_claims(of):
         params = {}
         while p_count < num_params:
             key = lines[i+1]
-            value = lines[i+2]
+            value = detex_claim(lines[i+2])
             i+=2
             p_count+=1
             params[key]=value
@@ -40,7 +40,7 @@ def parse_claims(of):
         if not l.startswith("@CLAIM@"):
             raise RuntimeError("Malformed claim file: " + l)
         claim_id = l[len("@CLAIM@"):]
-        assert claim_id in claims
+        assert claim_id in claims, claim_id
         i+=1
         claim_text = ""
         while i < len(lines) and not lines[i].startswith("@CLAIM@"):
@@ -135,10 +135,11 @@ else:
         print "Could not infer checker file from claim file " + sys.argv[1] + ", please specify"
         sys.exit(1)
     check_def_file = sys.argv[1][:-4] + ".chk"
-    if not os.path.exists(check_def_file):
-        claim_checkers = {}
-    else:
-        claim_checkers = parse_checkers(check_def_file)
+
+if not os.path.exists(check_def_file):
+    claim_checkers = {}
+else:
+    claim_checkers = parse_checkers(check_def_file)
 
 check_results = check_claims(os.path.realpath(os.path.dirname(sys.argv[1])), claims, claim_checkers)
 
