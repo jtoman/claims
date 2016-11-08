@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
 \ProvidesPackage{claims}[2016/09/16]
 
-\RequirePackage{color}
+\RequirePackage{color,xpatch}
 
 \newif\if@trackinputfiles
 
@@ -45,6 +45,7 @@
 \newif\if@activeclaim
 \newcount\claimrefs@counter
 \claimrefs@counter=0
+\newcounter{claimtext@counter}
 
 \def\claimref@write[#1]#2{%
   \advance\claimrefs@counter by1%
@@ -68,6 +69,26 @@
 \def\falseclaim[#1]#2{\textcolor{red}{[Claim ``#1'']:} #2 \textcolor{red}{[is FALSE]}}
 \def\unknownclaim[#1]#2{\textcolor{blue}{[Claim ``#1'']:} #2 \textcolor{blue}{[is unverified]}}
 \def\validclaim[#1]#2{#2}
+
+\def\claim@saveclaim[#1]#2{%
+  \stepcounter{claimtext@counter}
+  \global\expandafter\def\csname claim@claimtext@\theclaimtext@counter\endcsname{#2}%
+  \global\expandafter\def\csname claim@claimtag@\theclaimtext@counter\endcsname{#1}%
+}
+
+% courtesy of http://tex.stackexchange.com/questions/110883/writing-to-a-file
+\let\protected@iwrite\protected@write
+% patch the copy to add \immediate
+\xpatchcmd{\protected@iwrite}{\write}{\immediate\write}{}{}
+
+
+\def\claim@writeclaimtext@rec{%
+  \ifnum \value{claimtext@counter}>0%
+  \protected@iwrite\claimoutput{}{@CLAIM@\csname claim@claimtag@\theclaimtext@counter\endcsname}%
+  \protected@iwrite\claimoutput{\let\claimref\claimref@id}{\csname claim@claimtext@\theclaimtext@counter\endcsname}%
+  \addtocounter{claimtext@counter}{-1}%
+  \claim@writeclaimtext@rec{}%
+\fi}
 
 \def\claim@internal[#1][#2]#3{%
 %% invariant checking
@@ -95,13 +116,14 @@
   \unknownclaim[#2]{#3}%
 \fi%
 %% write metadata
-\protected@write\claimoutput{}{@CLAIM@#2}%
-\protected@write\claimoutput{\let\claimref\claimref@id}{#3}%
+\claim@saveclaim[#2]{#3}
 \immediate\write\claimoutput{#1 #2}%
 \write@claimrefs{}%
 %%
 %% End claim processing
 \@activeclaimfalse%
 }
+
+\AtEndDocument{\claim@writeclaimtext@rec{}}
 
 \endinput
