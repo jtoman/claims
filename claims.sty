@@ -71,7 +71,7 @@
 \def\validclaim[#1]#2{#2}
 
 \def\claim@saveclaim[#1]#2{%
-  \stepcounter{claimtext@counter}
+  \stepcounter{claimtext@counter}%
   \global\expandafter\def\csname claim@claimtext@\theclaimtext@counter\endcsname{#2}%
   \global\expandafter\def\csname claim@claimtag@\theclaimtext@counter\endcsname{#1}%
 }
@@ -116,7 +116,7 @@
   \unknownclaim[#2]{#3}%
 \fi%
 %% write metadata
-\claim@saveclaim[#2]{#3}
+\claim@saveclaim[#2]{#3}%
 \immediate\write\claimoutput{#1 #2}%
 \write@claimrefs{}%
 %%
