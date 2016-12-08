@@ -66,6 +66,7 @@ try:
     expect_fail("fail.tex")
     expect_pass("invert.tex")
     expect_pass("no-quote.tex")
+    expect_pass("multipage.tex")
     expect_unverified("unverified.tex")
     expect_pass("dash.tex")
 except TestFailedError as e:
